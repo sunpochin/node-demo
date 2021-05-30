@@ -20,6 +20,12 @@ html {
     color: #1abc9c !important;
 }
 
+.login {
+  right: 10px;
+	position: absolute;
+	text-align: right;
+}
+
 .footer-padding {
 	padding-bottom: 60px;
 }

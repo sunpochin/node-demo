@@ -79,14 +79,20 @@ const user3 = new User({
 
 
 const app = express();
-app.use(passport.initialize());
-app.use(passport.session());
-
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(express.static("public"));
+
+app.use(session({
+  secret: "our little secret!",
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 const uri = "mongodb+srv://" + process.env.MONGODB_ADMIN + ":" + process.env.MONGODB_PASSWORD + "@cluster0.o1ffm.mongodb.net/blogDB?retryWrites=true&w=majority";
 
@@ -100,28 +106,23 @@ mongoose.connect(uri, {
 
 
 app.get("/", function(req, res) {
+  let login = "";
   User.find({}, function(err, foundUsers) {
+    // console.log("req: ", req);
+    if (req.isAuthenticated()) {
+      login = "logged in as: " + req.user.username;
+    } else {
+      login = "not logged in:";
+    }
+
     if (!err) {
       res.render("home", {
-        foundUsers: foundUsers
+        foundUsers: foundUsers,
+        login: login
       });
     } else {
       console.log(err);
     }
-  });
-
-});
-
-
-app.get("/about", function(req, res) {
-  res.render("about", {
-    aboutContent: aboutContent
-  });
-});
-
-app.get("/contact", function(req, res) {
-  res.render("contact", {
-    contactContent: contactContent
   });
 });
 
@@ -134,6 +135,7 @@ app.post("/compose", function(req, res) {
     title: req.body.postTitle,
     content: req.body.postBody
   });
+  console.log("req.user: ", req.user);
   newPost.save(function(err) {
     if (!err) {
       res.redirect("/");
@@ -164,14 +166,25 @@ app.get("/posts/:postId", function(req, res) {
 
 app.get("/user/:username", function(req, res) {
   const username = req.params.username;
-  console.log(username);
+  let compose = false;
+  if (req.isAuthenticated()) {
+    console.log("req.user.username: ", req.user.username);
+    console.log("username as: ", username);
+    if (String(username) === String(req.user.username) ) {
+      console.log("posting as: ", username);
+      compose = true;
+    }
+  } else {
+
+  }
   User.findOne({
     username: username
   }, function(err, foundUser) {
     if (!err) {
       res.render("user", {
         username: foundUser.username,
-        posts: foundUser.array
+        posts: foundUser.posts,
+        compose: compose,
       });
     } else {
       console.log(err);
@@ -185,7 +198,7 @@ app.get("/register", function(req, res) {
 
 app.post("/register", function(req, res) {
   User.register({
-    username: req.body.username
+    username: req.body.username,
   }, req.body.password, function(err, User) {
     if (err) {
       console.log(err);
@@ -209,6 +222,7 @@ app.get("/auth/google/secrets",
   }),
   function(req, res) {
     // Successful authentication, redirect home.
+    console.log("Successful authentication, redirect home.");
     res.redirect('/');
   });
 
@@ -220,7 +234,7 @@ app.post("/login", function(req, res) {
   const username = req.body.username;
   User.findOne( {username: username}, function(err, foundUser) {
     if (foundUser) {
-      console.log("foundUser: ", foundUser);
+      // console.log("foundUser: ", foundUser);
       req.login(foundUser, function(err) {
         if (err) {
           console.log(err);
@@ -237,8 +251,6 @@ app.post("/login", function(req, res) {
     }
   });
 });
-
-
 
 
 app.listen(3000, function() {

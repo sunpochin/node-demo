@@ -1,11 +1,19 @@
 <%- include("partials/header"); -%>
-<h1>My pretty blogs</h1>
+<container>
+  <div class="login">
+    <h2><%=login%></h2>
+  </div>
+  <div>
+    <h1>我的部落格</h1>
+  </div>
 
-<%  foundUsers.forEach(function(user){ %>
-<div>
-  <h2><%=user.username%></h2> <a href="/user/<%=user.username%>">閱讀更多...</a>
-  <!-- <p><%=user.email%> </p> -->
-</div>
-<% }) %>
+  <% foundUsers.forEach(function(user){ %>
+  <div>
+    <h2><%=user.username%></h2> <a href="/user/<%=user.username%>">閱讀更多...</a>
+    <!-- <p><%=user.email%> </p> -->
+  </div>
+  <% }) %>
+
+</container>
 
 <%- include("partials/footer"); -%>

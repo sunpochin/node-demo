@@ -1,5 +1,21 @@
-
 <%- include("partials/header"); -%>
-    <h1><%=username%> 的文章</h1>
+<h1><%=username%> 的文章</h1>
+
+<%  posts.forEach(function(post){ %>
+<h1><%=post.title%></h1>
+<p>
+  <%=post.content.substring(0, 100) + " ..."%>
+  <a href="/posts/<%=post._id%>">Read More</a>
+</p>
+<% }) %>
+
+<% if (compose) { %>
+<div class="jumbotron text-center">
+  <div class="container">
+      <a class="btn btn-light btn-lg" href="/compose" role="button">新文章</a>
+  </div>
+</div>
+<% } %>
+
 
 <%- include("partials/footer"); -%>
