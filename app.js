@@ -55,7 +55,7 @@ passport.use(new GoogleStrategy({
       googleId: profile.id,
       email: profile.email,
       username: profile.displayName
-     }, function (err, user) {
+    }, function(err, user) {
       return cb(err, user);
     });
   }
@@ -199,14 +199,46 @@ app.post("/register", function(req, res) {
 });
 
 app.get("/auth/google",
-  passport.authenticate('google', { scope: ['profile'] }));
+  passport.authenticate('google', {
+    scope: ['profile']
+  }));
 
 app.get("/auth/google/secrets",
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', {
+    failureRedirect: '/login'
+  }),
   function(req, res) {
     // Successful authentication, redirect home.
     res.redirect('/');
   });
+
+app.get("/login", function(req, res) {
+  res.render("login");
+});
+
+app.post("/login", function(req, res) {
+  const username = req.body.username;
+  User.findOne( {username: username}, function(err, foundUser) {
+    if (foundUser) {
+      console.log("foundUser: ", foundUser);
+      req.login(foundUser, function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          passport.authenticate("local")(req, res, function() {
+            res.redirect("/");
+          });
+        }
+      });
+    } else {
+      const error = "user not found: " + foundUser;
+      console.log(error);
+      res.render("error", {error: error});
+    }
+  });
+});
+
+
 
 
 app.listen(3000, function() {
