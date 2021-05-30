@@ -4,12 +4,12 @@
     <h2><%=login%></h2>
   </div>
   <div>
-    <h1>我的部落格</h1>
+    <h1>作家列表</h1>
   </div>
 
   <% foundUsers.forEach(function(user){ %>
   <div>
-    <h2><%=user.username%></h2> <a href="/user/<%=user.username%>">閱讀更多...</a>
+    <h3><%=user.username%></h3> <a href="/user/<%=user.username%>">閱讀更多...</a>
     <!-- <p><%=user.email%> </p> -->
   </div>
   <% }) %>

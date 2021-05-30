@@ -131,19 +131,26 @@ app.get("/compose", function(req, res) {
 });
 
 app.post("/compose", function(req, res) {
+  console.log("req.user: ", req.user);
   const newPost = new Post({
     title: req.body.postTitle,
     content: req.body.postBody
   });
-  console.log("req.user: ", req.user);
   newPost.save(function(err) {
-    if (!err) {
-      res.redirect("/");
-    } else {
+    if (err) {
       console.log("err: ", err);
     }
   });
 
+  User.findOne({username: req.user.username}, function(err, foundUser) {
+    if (foundUser) {
+      foundUser.posts.push(newPost);
+      foundUser.save();
+      res.redirect("/");
+    } else {
+      console.log(err);
+    }
+  });
 });
 
 app.get("/posts/:postId", function(req, res) {
